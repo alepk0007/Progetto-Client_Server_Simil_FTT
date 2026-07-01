@@ -3,9 +3,6 @@
 Applicazione Client-Server per il trasferimento file su architettura TCP/IP.
 Progetto di TEPSIT - Classe 5ª A
 
-## Gruppo di Lavoro
-Mazzinghi Alessandro, Betti Paolo, Gracci Niccolò
-
 ## Descrizione
 Il sistema permette a un client remoto di connettersi a un server centrale, navigare tra le directory e scaricare file. Supporta sia l'esecuzione in locale (localhost) che in rete geografica (WAN) tramite Port Forwarding.
 
