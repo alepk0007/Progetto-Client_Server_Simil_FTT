@@ -1,34 +1,46 @@
-# Progetto Simil-FTP Java
+### 🌐 Progetto Simil-FTP (Client-Server TCP/IP in Java)
 
-Applicazione Client-Server per il trasferimento file su architettura TCP/IP.
-Progetto di TEPSIT - Classe 5ª A
+Un'applicazione distribuita basata su Socket TCP (Stream Socket) che implementa le funzionalità essenziali di un server FTP. Il sistema supporta l'esplorazione del file system remoto e il trasferimento sicuro e verificato di file binari, collaudato con successo in un ambiente WAN reale.
 
-## Descrizione
-Il sistema permette a un client remoto di connettersi a un server centrale, navigare tra le directory e scaricare file. Supporta sia l'esecuzione in locale (localhost) che in rete geografica (WAN) tramite Port Forwarding.
+#### 🚀 Architettura e Funzionalità Core
 
-## Requisiti
-* Ambiente di sviluppo Integrato (Consigliamo Eclipse).
-* Connessione di rete (per modalità WAN).
+* **Server Multithreaded:** Il server principale rimane in ascolto passivo sulla porta TCP `5500`. Ad ogni nuova connessione in ingresso (`accept()`), delega la sessione a un `ThreadConnessioneFTP` dedicato (che implementa `Runnable`). Questo approccio concorrente garantisce che il server rimanga sempre disponibile per accettare nuovi client, eliminando i colli di bottiglia durante i trasferimenti pesanti.
 
-## Guida all'Avvio
 
-### 1. Avvio del Server
-1.  Importare la cartella `esercizio_FTPLatoServer` nel proprio IDE (Eclipse/IntelliJ).
-2.  Aprire il file `MainServerFTP.java`.
-3.  Eseguire l'applicazione.
-4.  Il server mostrerà il messaggio: `Server FTP Aperto sulla porta 5500`.
+* **Trasferimento File Sincronizzato:** Per prevenire la corruzione dei dati durante il passaggio sulla rete, il comando `GET` utilizza un protocollo rigoroso: il server comunica prima l'esito della ricerca ("OK") e poi invia un intero `Long` (8 byte) che indica la dimensione esatta del file. Il file viene successivamente trasmesso a stream in blocchi da 4KB (buffer).
 
-### 2. Avvio del Client
-1.  Importare la cartella `esercizio_FTPLatoClient`.
-2.  Aprire il file `ClientMainFTP.java`.
-3.  **Configurazione IP:**
-    * Per test locale: lasciare `127.0.0.1`.
-    * Per test remoto: inserire l'IP Pubblico del server (es. `79.20.xxx.xxx`).
-4.  Eseguire l'applicazione.
 
-## Comandi Disponibili
-Una volta connessi, digitare nella console:
-*  LS  : Mostra l'elenco dei file nella cartella corrente del server.
-*  GET <nomefile>` : Scarica il file specificato (es. `GET foto.jpg`).
-*  CD <nome_cartella> : Cambia la directory di lavoro sul server (usa .. per tornare indietro).
-*  QUIT  : Chiude la connessione.
+* **Navigazione Dinamica e Sicura:** Il server mantiene traccia dello stato della directory corrente per ciascun thread client. Risolve dinamicamente i percorsi (incluso l'arretramento tramite `..`) affidandosi a `getCanonicalFile()`, normalizzando il percorso e confermando il cambio di stato.
+
+
+
+#### 📡 Infrastruttura di Rete (Deployment WAN)
+
+Oltre all'esecuzione nativa in `localhost` (`127.0.0.1`), il sistema è stato progettato e testato per l'accesso geografico attraversando l'architettura NAT di un router.
+
+* **Port Forwarding (DNAT):** Il traffico TCP in ingresso sull'IP pubblico WAN verso la porta `5500` viene instradato in modo statico all'indirizzo IP LAN privato del server interno (`192.168.1.242`).
+
+
+* **Gestione Firewall:** È stata predisposta una specifica regola in ingresso (Inbound Rule) sul Windows Defender Firewall del server per autorizzare il traffico TCP esterno sulla porta in ascolto.
+
+
+
+#### 🔤 Specifiche del Protocollo Applicativo
+
+| Comando Inviato (UTF) | Azione Lato Server | Risposta / Flusso Dati |
+| --- | --- | --- |
+| `LS` | Lettura del file system locale alla cartella corrente. | Ritorna una stringa concatenata con l'elenco dei `[FILE]` e delle `[DIR]`.
+
+ |
+| `CD <cartella>` | Navigazione nelle directory (supporta percorso relativo `..`). | Conferma la nuova directory di lavoro o restituisce stringa di errore se inesistente.
+
+ |
+| `GET <nomefile>` | Avvia il processo binario di scaricamento verso il client locale. | Stato `"OK"` → Dimensione File (Long) → Flusso Byte a blocchi da 4KB.
+
+ |
+| `QUIT` | Interruzione volontaria della sessione remota. | Chiusura pulita del socket di connessione (`client.close()`).
+
+ |
+
+
+
