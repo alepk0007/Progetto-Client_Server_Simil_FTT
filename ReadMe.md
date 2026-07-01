@@ -25,20 +25,14 @@ Oltre all'esecuzione nativa in `localhost` (`127.0.0.1`), il sistema è stato pr
 
 
 
-#### 🔤 Specifiche del Protocollo Applicativo
+### Specifiche del Protocollo Applicativo
 
-| Comando Inviato (UTF) | Azione Lato Server | Risposta / Flusso Dati |
-| --- | --- | --- |
-| `LS` | Lettura del file system locale alla cartella corrente. | Ritorna una stringa concatenata con l'elenco dei `[FILE]` e delle `[DIR]`.
-
- |
-| `CD <cartella>` | Navigazione nelle directory (supporta percorso relativo `..`). | Conferma la nuova directory di lavoro o restituisce stringa di errore se inesistente.
-
- |
-| `GET <nomefile>` | Avvia il processo binario di scaricamento verso il client locale. | Stato `"OK"` → Dimensione File (Long) → Flusso Byte a blocchi da 4KB.
-
- |
-| `QUIT` | Interruzione volontaria della sessione remota. | Chiusura pulita del socket di connessione (`client.close()`).
+| Comando Inviato | Azione Lato Server | Risposta / Flusso Dati |
+|---|---|---|
+| `LS` | Lettura del file system locale alla cartella corrente. | Ritorna una stringa con l'elenco dei `[FILE]` e delle `[DIR]`. |
+| `CD <cartella>` | Navigazione nelle directory (supporta `..`). | Conferma la nuova directory di lavoro o restituisce errore. |
+| `GET <nomefile>`| Avvia il processo di scaricamento verso il client. | Stato `OK` → Dimensione File (Long) → Flusso Byte (4KB). |
+| `QUIT` | Interruzione volontaria della sessione remota. | Chiusura pulita del socket di connessione. |
 
 
 
