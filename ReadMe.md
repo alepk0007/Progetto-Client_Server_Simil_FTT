@@ -40,7 +40,5 @@ Oltre all'esecuzione nativa in `localhost` (`127.0.0.1`), il sistema è stato pr
  |
 | `QUIT` | Interruzione volontaria della sessione remota. | Chiusura pulita del socket di connessione (`client.close()`).
 
- |
-
 
 
